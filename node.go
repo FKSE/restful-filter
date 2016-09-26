@@ -43,7 +43,7 @@ func NewCompareNode(field string, value interface{}, operator uint32) (*CompareN
 		return nil, errors.New("Fieldname may not be empty")
 	}
 	switch operator {
-	case compareEq, compareNotEq, compareGt, compareGte, compareLt, compareLte:
+	case compareEq, compareNotEq, compareGt, compareGte, compareLt, compareLte, compareIn, compareNotIn:
 		return &CompareNode{
 			Field:    field,
 			Value:    value,

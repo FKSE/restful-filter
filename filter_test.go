@@ -16,10 +16,24 @@ var filters = []struct {
 	{
 		"examples/simple.json",
 		map[string]int{
-			"AND":             2,
-			"t.id = ?":        1,
-			"s.name = ?":      1,
-			"u.last_name = ?": 1,
+			"AND":                       2,
+			"t.id = :tid":               1,
+			"s.name = :sname":           1,
+			"u.last_name = :ulast_name": 1,
+		},
+		[]interface{}{1, "Open", "Doe"},
+	},
+	{
+		"examples/operators.json",
+		map[string]int{
+			"AND":                        7,
+			"p.vat < :pvat":              1,
+			"c.id IN(:cid_0,:cid_1,:cid_2,:cid_3)":               1,
+			"u.state NOT IN(:ustate_0,:ustate_1,:ustate_2)":     1,
+			"s = :s":                     1,
+			"u.last_name <> :ulast_name": 1,
+			"min_rate > :min_rate":       1,
+			"max_rate >= :max_rate":      1,
 		},
 		[]interface{}{1, "Open", "Doe"},
 	},
@@ -28,9 +42,13 @@ var filters = []struct {
 func TestEqual(t *testing.T) {
 
 	filter := NewFilter("t", map[string]string{
-		"user":  "u",
+		"minRate":       "min_rate",
+		"maxRate":       "max_rate",
+		"user":          "u",
 		"user.lastName": "u.last_name",
-		"state": "s",
+		"state":         "s",
+		"customer":      "c",
+		"project":       "p",
 	})
 
 	for _, tt := range filters {
@@ -44,9 +62,9 @@ func TestEqual(t *testing.T) {
 
 		visitor := &SQLVisitor{}
 		node.Accept(visitor)
-		fmt.Println()
 
 		sql := visitor.Sql()
+		fmt.Println(sql)
 		// golang maps are not ordered ..
 		for part, count := range tt.sqlParts {
 			if count == 1 {

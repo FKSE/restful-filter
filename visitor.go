@@ -1,6 +1,9 @@
 package filter
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Visitor interface {
 	Visit(node Node)
@@ -37,7 +40,17 @@ func (v *SQLVisitor) visitLogic(node *LogicNode) {
 }
 
 func (v *SQLVisitor) visitCompare(node *CompareNode) {
-	v.sql += fmt.Sprintf("%s %s ?", node.Field, sqlOperators[node.Operator])
+	param := strings.Replace(node.Field, ".", "", -1)
+	if node.Operator == compareIn || node.Operator == compareNotIn {
+
+		var params []string
+		for index := range node.Value.([]interface{}) {
+			params = append(params, fmt.Sprintf(":%s_%d", param, index))
+		}
+		v.sql += fmt.Sprintf("%s %s(%s)", node.Field, sqlOperators[node.Operator], strings.Join(params, ","))
+	} else {
+		v.sql += fmt.Sprintf("%s %s :%s", node.Field, sqlOperators[node.Operator], param)
+	}
 }
 
 func (v *SQLVisitor) Sql() string {

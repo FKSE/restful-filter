@@ -1,0 +1,36 @@
+{
+  "state": {
+    "$eq": "Open"
+  },
+  "user.lastName": {
+    "$ne": "Doe"
+  },
+  "minRate": {
+    "$gt": 10
+  },
+  "maxRate": {
+    "$gte": 12
+  },
+  "project.vat": {
+    "$lt": 12.6
+  },
+  "project.price": {
+    "$lte": 99.999
+  },
+  "customer.id": {
+    "$in": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "user.state": {
+    "$nin": [
+      "Open",
+      "Pending",
+      "Canceled"
+    ]
+  }
+}
+

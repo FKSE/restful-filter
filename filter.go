@@ -46,7 +46,6 @@ func (f *Filter) Parse(query string) (Node, error) {
 
 func (f *Filter) parseNode(node map[string]interface{}) (Node, error) {
 	var tree Node
-	fmt.Println(node)
 	for k, v := range node {
 		// check if field is a operator
 		if operator, ok := compareOperatorMapping[k]; ok {
@@ -61,11 +60,11 @@ func (f *Filter) parseNode(node map[string]interface{}) (Node, error) {
 			case []interface{}:
 				node, err = NewCompareNode(f.replaceAlias(k), v, compareIn)
 			case map[string]interface{}:
+				node, err = f.parseCompareNode(k, v.(map[string]interface{}))
 			}
 			if err != nil {
 				return nil, err
 			}
-			//fmt.Println(node)
 			if tree == nil {
 				tree = node
 			} else {
@@ -74,6 +73,20 @@ func (f *Filter) parseNode(node map[string]interface{}) (Node, error) {
 		}
 	}
 	return tree, nil
+}
+
+func (f *Filter) parseCompareNode(field string, cmp map[string]interface{}) (node Node, err error) {
+	if len(cmp) != 1 {
+		return nil, fmt.Errorf("Object for field %s must contain exactly one key", field)
+	}
+	for k, v := range cmp {
+		operator, ok := compareOperatorMapping[k]
+		if !ok {
+			return nil, fmt.Errorf("Unkown compare operator %s", k)
+		}
+		node, err = NewCompareNode(f.replaceAlias(field), v, operator)
+	}
+	return node, err
 }
 
 func (f *Filter) insertNode(tree Node, node Node) Node {
